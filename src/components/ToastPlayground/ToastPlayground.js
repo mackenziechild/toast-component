@@ -2,8 +2,7 @@ import React from 'react';
 
 import Button from '../Button';
 
-import Toast from '../Toast/Toast';
-
+import { ToastContext } from '../ToastProvider/';
 import ToastShelf from '../ToastShelf/ToastShelf';
 
 import styles from './ToastPlayground.module.css';
@@ -11,28 +10,20 @@ import styles from './ToastPlayground.module.css';
 const VARIANT_OPTIONS = ['notice', 'warning', 'success', 'error'];
 
 function ToastPlayground() {
+  const { createToast } = React.useContext(ToastContext);
+
   const [message, setMessage] = React.useState('');
-  const [variant, setVariant] = React.useState('notice');
-  const [toasts, setToasts] = React.useState([]);
+  const [variant, setVariant] = React.useState(VARIANT_OPTIONS[0]);
 
-  const handleAddToast = ({message, variant}) => {
-    if (message.trim() === '') return;
-
-    const newToast = {
-      message,
-      variant,
-      id: Math.random(),
-    }
-    const nextToasts = [...toasts, newToast];
-    setToasts(nextToasts);
+  function handleCreateToast(e) {
+    e.preventDefault();
+    
+    createToast({ message, variant });
+    
     setMessage('');
-    setVariant('notice');
+    setVariant(VARIANT_OPTIONS[0]);
   }
 
-  const handleRemoveToast = (id) => {
-    const filteredToasts = toasts.filter(toast => toast.id !== id);
-    setToasts(filteredToasts);
-  }
 
   return (
     <div className={styles.wrapper}>
@@ -41,9 +32,12 @@ function ToastPlayground() {
         <h1>Toast Playground</h1>
       </header>
 
-      <ToastShelf toasts={toasts} handleRemoveToast={handleRemoveToast} />
+      <ToastShelf />
 
-      <div className={styles.controlsWrapper}>
+      <form 
+        onSubmit={handleCreateToast}
+        className={styles.controlsWrapper}
+      >
         <div className={styles.row}>
           <label
             htmlFor="message"
@@ -92,12 +86,10 @@ function ToastPlayground() {
           <div
             className={`${styles.inputWrapper} ${styles.radioWrapper}`}
           >
-            <Button
-              onClick={() => handleAddToast({message, variant})}
-            >Pop Toast!</Button>
+            <Button>Pop Toast!</Button>
           </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 }
